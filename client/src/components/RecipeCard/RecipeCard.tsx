@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router';
 
 import type { Recipe } from '../../types';
 import { categoryColors } from '../../data/recipes';
+import { useFavorites } from '../../contexts/FavoritesContext';
 import './RecipeCard.css';
 
 type Props = {
@@ -10,6 +11,8 @@ type Props = {
 
 function RecipeCard({ recipe }: Props) {
   const navigate = useNavigate();
+  const { favorites, onToggleFavorite } = useFavorites();
+  const isFavorited = favorites.has(recipe.id);
 
   return (
     <article className="recipe-card">
@@ -19,6 +22,17 @@ function RecipeCard({ recipe }: Props) {
         onClick={() => navigate(`/recipes/${recipe.id}`)}
         aria-label="View recipe details"
       ></button>
+      <button
+        type="button"
+        className="recipe-card__favorite"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggleFavorite(recipe.id);
+        }}
+        aria-label={isFavorited ? 'Remove from favorites' : 'Add to favorites'}
+      >
+        {isFavorited ? '♥' : '♡'}
+      </button>
       <span
         style={{
           backgroundColor: categoryColors[recipe.category.toLocaleLowerCase()],

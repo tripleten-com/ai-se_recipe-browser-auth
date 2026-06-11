@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router-dom';
 
 import Logo from '../../assets/logo.svg';
+import Counter from '../Counter/Counter';
 import './Header.css';
 
 function getNavLinkClass({ isActive }: { isActive: boolean }) {
@@ -19,7 +20,7 @@ function Header() {
             Recipes
           </NavLink>
           <NavLink to="/favorites" className={getNavLinkClass}>
-            Favorites
+            Favorites <Counter />
           </NavLink>
         </nav>
       </div>
