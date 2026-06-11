@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../config');
+const verifyToken = require('../middleware/auth');
 
 const router = express.Router();
 
@@ -50,6 +51,11 @@ router.post('/login', async (req, res) => {
   );
 
   res.json({ data: { token, user: { userId: user.userId, name: user.name, email: user.email } } });
+});
+
+router.get('/me', verifyToken, (req, res) => {
+  const { userId, name, email } = req.user;
+  res.json({ data: { userId, name, email } });
 });
 
 module.exports = router;
