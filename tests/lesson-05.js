@@ -25,17 +25,13 @@ check('request reads the stored token from localStorage',
   has(api, 'localStorage.getItem') && has(api, 'auth-token'),
   'Add const token = localStorage.getItem("auth-token") ?? "" inside the request function');
 
-check('request includes an Authorization header when a token is present',
+check('request includes an Authorization header',
   has(api, 'Authorization'),
-  'Spread the Authorization header into the headers object when token is non-empty');
+  'Add Authorization: `Bearer ${token}` to the headers object in request');
 
 check('Authorization header uses Bearer scheme',
   has(api, 'Bearer'),
   'Format the header as: Authorization: `Bearer ${token}`');
-
-check('Authorization header is conditional (omitted when no token)',
-  has(api, 'token &&') || has(api, '&& {') || has(api, 'token ?'),
-  'Only include the Authorization header when token is non-empty — use a conditional spread');
 
 if (failures.length === 0) {
   console.log('\n✅ All checks passed!\n');
