@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, NavLink } from "react-router-dom";
 
 import type { Recipe } from "../../types";
 import { getRecipes } from "../../utils/api";
@@ -30,7 +30,7 @@ function App() {
   /** Renders loading/error in the home route rather than returning early, keeping other routes reachable. */
   function homeContent() {
     if (isLoading) return <p className="app__loading">Loading...</p>;
-    if (error) return <p className="app__message">Sign in to view recipes.</p>;
+    if (error) return <p className="app__message"><NavLink to="/login">Sign in</NavLink> to view recipes.</p>;
     return <HomePage recipes={recipes} />;
   }
 

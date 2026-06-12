@@ -22,6 +22,12 @@ function Header() {
           <NavLink to="/favorites" className={getNavLinkClass}>
             Favorites <Counter />
           </NavLink>
+          <NavLink to="/login" className={getNavLinkClass}>
+            Login
+          </NavLink>
+          <NavLink to="/register" className={getNavLinkClass}>
+            Register
+          </NavLink>
         </nav>
       </div>
     </header>
