@@ -13,6 +13,7 @@ router.get('/', (req, res) => {
 router.get('/:id', (req, res) => {
   const recipe = recipes.find((r) => r.id === req.params.id);
   if (!recipe) {
+    console.error(`GET /recipes/${req.params.id} 404: recipe not found`);
     return res.status(404).json({ message: 'Recipe not found' });
   }
   res.json({ data: recipe });
@@ -21,6 +22,7 @@ router.get('/:id', (req, res) => {
 router.put('/:id/likes', (req, res) => {
   const recipe = recipes.find((r) => r.id === req.params.id);
   if (!recipe) {
+    console.error(`PUT /recipes/${req.params.id}/likes 404: recipe not found`);
     return res.status(404).json({ message: 'Recipe not found' });
   }
 
