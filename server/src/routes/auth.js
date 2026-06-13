@@ -3,18 +3,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../config');
 const verifyToken = require('../middleware/auth');
+const users = require('../data/users');
 
 const router = express.Router();
-
-// Seeded test account — credentials are in the project README.
-const users = [
-  {
-    userId: '1',
-    name: 'Test User',
-    email: 'test@example.com',
-    password: '$2a$10$mPuGaLpsizgVT4T0K4r.tuHv5WGKob0USGyPNawCO58cCewumeHbK',
-  },
-];
 
 router.post('/register', async (req, res) => {
   const { name, email, password } = req.body;
@@ -31,7 +22,7 @@ router.post('/register', async (req, res) => {
 
   const hash = await bcrypt.hash(password, 10);
   const userId = String(Date.now());
-  const user = { userId, name, email, password: hash };
+  const user = { userId, name, email, password: hash, likes: [] };
   users.push(user);
 
   res.status(201).json({ data: { userId, name, email } });
@@ -63,12 +54,22 @@ router.post('/login', async (req, res) => {
     { expiresIn: '7d' },
   );
 
-  res.json({ data: { token, user: { userId: user.userId, name: user.name, email: user.email } } });
+  res.json({
+    data: {
+      token,
+      user: { userId: user.userId, name: user.name, email: user.email, likes: user.likes },
+    },
+  });
 });
 
 router.get('/me', verifyToken, (req, res) => {
-  const { userId, name, email } = req.user;
-  res.json({ data: { userId, name, email } });
+  const user = users.find((u) => u.userId === req.user.userId);
+  if (!user) {
+    console.error(`GET /auth/me 404: user ${req.user.userId} not found`);
+    return res.status(404).json({ message: 'User not found' });
+  }
+  const { userId, name, email, likes } = user;
+  res.json({ data: { userId, name, email, likes } });
 });
 
 module.exports = router;

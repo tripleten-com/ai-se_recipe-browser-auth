@@ -1,6 +1,7 @@
 const express = require('express');
 const verifyToken = require('../middleware/auth');
 const recipes = require('../data/recipes');
+const users = require('../data/users');
 
 const router = express.Router();
 
@@ -27,10 +28,20 @@ router.put('/:id/likes', (req, res) => {
   }
 
   const { userId } = req.user;
+
   if (recipe.likes.includes(userId)) {
     recipe.likes = recipe.likes.filter((id) => id !== userId);
   } else {
     recipe.likes.push(userId);
+  }
+
+  const user = users.find((u) => u.userId === userId);
+  if (user) {
+    if (user.likes.includes(recipe.id)) {
+      user.likes = user.likes.filter((id) => id !== recipe.id);
+    } else {
+      user.likes.push(recipe.id);
+    }
   }
 
   res.json({ data: recipe });
