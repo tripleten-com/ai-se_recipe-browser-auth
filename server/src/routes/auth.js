@@ -2,7 +2,6 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../config');
-const verifyToken = require('../middleware/auth');
 const users = require('../data/users');
 
 const router = express.Router();
@@ -60,16 +59,6 @@ router.post('/login', async (req, res) => {
       user: { userId: user.userId, name: user.name, email: user.email, likes: user.likes },
     },
   });
-});
-
-router.get('/me', verifyToken, (req, res) => {
-  const user = users.find((u) => u.userId === req.user.userId);
-  if (!user) {
-    console.error(`GET /auth/me 404: user ${req.user.userId} not found`);
-    return res.status(404).json({ message: 'User not found' });
-  }
-  const { userId, name, email, likes } = user;
-  res.json({ data: { userId, name, email, likes } });
 });
 
 module.exports = router;
