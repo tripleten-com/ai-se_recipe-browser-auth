@@ -32,8 +32,8 @@ describe("Lesson 08 — liking recipes", () => {
 
     await screen.findByText("Spaghetti Carbonara");
     // r1 has no likes; r2 is already liked by the mock user
-    expect(screen.getByRole("button", { name: "Like recipe" })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Unlike recipe" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add to favorites" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Remove from favorites" })).toBeInTheDocument();
   });
 
   it("clicking the heart PUTs to the likes endpoint and fills the heart", async () => {
@@ -41,10 +41,10 @@ describe("Lesson 08 — liking recipes", () => {
     renderApp("/");
 
     await screen.findByText("Spaghetti Carbonara");
-    await user.click(screen.getByRole("button", { name: "Like recipe" }));
+    await user.click(screen.getByRole("button", { name: "Add to favorites" }));
 
     const unlikeButtons = await screen.findAllByRole("button", {
-      name: "Unlike recipe",
+      name: "Remove from favorites",
     });
     expect(unlikeButtons).toHaveLength(2);
   });
