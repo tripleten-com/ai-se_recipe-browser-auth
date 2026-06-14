@@ -1,6 +1,6 @@
 # Recipe Browser — Frontend Auth
 
-Starting code for the Frontend Authentication chapter in TripleTen's AI-Assisted Software Engineering program.
+Starting code for the Frontend Authentication chapter in TripleTen's AI Software Engineering program.
 
 ## Setup
 
@@ -36,4 +36,4 @@ Replace `02` with the lesson number (02–08).
 
 ## Solutions
 
-Solutions can be found in the `draft/solution` branch.
+Solutions can be found in the `solutions` branch.
