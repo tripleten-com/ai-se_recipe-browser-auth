@@ -38,10 +38,6 @@ export function toggleLike(id: string): Promise<Recipe> {
   return request<Recipe>(`${BASE_URL}/recipes/${id}/likes`, { method: "PUT" });
 }
 
-export function getCurrentUser(): Promise<CurrentUser> {
-  return request<CurrentUser>(`${BASE_URL}/users/me`);
-}
-
 export function loginUser(
   email: string,
   password: string,

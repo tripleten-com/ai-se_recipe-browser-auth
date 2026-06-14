@@ -3,13 +3,10 @@ import type { Recipe, CurrentUser } from "../types";
 const BASE_URL = "http://localhost:3001";
 
 function request<T>(url: string, options: RequestInit = {}): Promise<T> {
-  const token = localStorage.getItem("auth-token") ?? "";
-
   return fetch(url, {
     ...options,
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
       ...options.headers,
     },
   })
@@ -36,10 +33,6 @@ export function getRecipe(id: string): Promise<Recipe> {
 
 export function toggleLike(id: string): Promise<Recipe> {
   return request<Recipe>(`${BASE_URL}/recipes/${id}/likes`, { method: "PUT" });
-}
-
-export function getCurrentUser(): Promise<CurrentUser> {
-  return request<CurrentUser>(`${BASE_URL}/users/me`);
 }
 
 export function loginUser(
