@@ -6,7 +6,7 @@ type AuthContextValue = {
   currentUser: CurrentUser | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (token: string, user: CurrentUser) => void;
+  login: (user: CurrentUser) => void;
   logout: () => void;
   updateLikes: (likes: string[]) => void;
 };
@@ -25,14 +25,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  function login(token: string, user: CurrentUser) {
-    localStorage.setItem("auth-token", token);
+  function login(user: CurrentUser) {
     setIsAuthenticated(true);
     setCurrentUser(user);
   }
 
   function logout() {
-    localStorage.removeItem("auth-token");
     setIsAuthenticated(false);
     setCurrentUser(null);
   }
@@ -42,18 +40,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   useEffect(() => {
-    const token = localStorage.getItem("auth-token");
-    if (!token) {
-      setIsLoading(false);
-      return;
-    }
     getCurrentUser()
       .then((user) => {
         setCurrentUser(user);
         setIsAuthenticated(true);
       })
       .catch(() => {
-        localStorage.removeItem("auth-token");
+        // no valid session - stay logged out
       })
       .finally(() => {
         setIsLoading(false);

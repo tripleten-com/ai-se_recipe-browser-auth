@@ -14,8 +14,8 @@ export default function LoginPage() {
     event.preventDefault();
     if (!isValid) return;
     try {
-      const { token, user } = await loginUser(values.email, values.password);
-      login(token, user);
+      const { user } = await loginUser(values.email, values.password);
+      login(user);
       navigate("/");
     } catch (err) {
       setSubmitError(

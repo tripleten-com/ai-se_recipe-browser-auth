@@ -4,6 +4,7 @@ import Logo from "../../assets/logo.svg";
 import Counter from "../Counter/Counter";
 import "./Header.css";
 import { useAuth } from "../../contexts/AuthContext";
+import { logoutUser } from "../../utils/api";
 
 function getNavLinkClass({ isActive }: { isActive: boolean }) {
   return isActive
@@ -16,8 +17,10 @@ function Header() {
   const { logout, currentUser, isAuthenticated } = useAuth();
 
   function handleLogout() {
-    logout();
-    navigate("/login");
+    logoutUser().finally(() => {
+      logout();
+      navigate("/login");
+    });
   }
 
   return (

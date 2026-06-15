@@ -3,13 +3,11 @@ import type { Recipe, CurrentUser } from "../types";
 const BASE_URL = "http://localhost:3001";
 
 function request<T>(url: string, options: RequestInit = {}): Promise<T> {
-  const token = localStorage.getItem("auth-token") ?? "";
-
   return fetch(url, {
     ...options,
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
       ...options.headers,
     },
   })
@@ -45,7 +43,7 @@ export function getCurrentUser(): Promise<CurrentUser> {
 export function loginUser(
   email: string,
   password: string,
-): Promise<{ token: string; user: CurrentUser }> {
+): Promise<{ user: CurrentUser }> {
   return request(`${BASE_URL}/auth/login`, {
     method: "POST",
     body: JSON.stringify({ email, password }),
@@ -61,4 +59,8 @@ export function registerUser(
     method: "POST",
     body: JSON.stringify({ email, password, name }),
   });
+}
+
+export function logoutUser(): Promise<void> {
+  return request(`${BASE_URL}/auth/logout`, { method: "POST" });
 }
