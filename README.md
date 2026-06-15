@@ -32,8 +32,8 @@ Tests for each lesson are in `client/tests/` and can be run from the project roo
 node client/tests/lesson-02.js
 ```
 
-Replace `02` with the lesson number (02–08).
+Replace `02` with the lesson number.
 
 ## Solutions
 
-Solutions can be found in the `solutions` branch.
+Solutions to most lessons are found in the `solutions` branch. The solution to the option httpOnly cookies lesson is found in `httpOnly-cookies-solution`.
