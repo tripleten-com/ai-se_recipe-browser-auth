@@ -16,6 +16,7 @@
   display: flex;
   gap: 8px;
   margin-left: auto;
+  align-items: center;
 }
 
 .header__nav-link {
@@ -33,4 +34,18 @@
 .header__nav-link:hover {
   text-decoration: underline;
   text-underline-offset: 0.1rem;
+}
+
+.header__text {
+  padding: 4px 8px;
+}
+
+.header__logout-btn {
+  border: none;
+  background-color: transparent;
+  padding: 4px 8px;
+}
+
+.header__logout-btn:hover {
+  opacity: 50%;
 }
