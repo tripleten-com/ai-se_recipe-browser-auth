@@ -135,3 +135,78 @@ button {
   font-weight: 500;
   margin: 0 0 8px;
 }
+
+/* Forms */
+
+.app__main .form {
+  margin: 15vh auto 0;
+}
+
+.form {
+  background-color: #fff;
+  border: solid 1px #f7f6f1;
+  max-width: 498px;
+  border-radius: 20px;
+  padding: 32px;
+  color: #0a0a0a;
+}
+
+.form__title {
+  font-size: 20px;
+  font-weight: 500;
+  margin: 0 0 32px;
+}
+
+.form__input-container {
+  margin: 0 0 24px;
+}
+
+.form__label {
+  display: flex;
+  flex-direction: column;
+  color: #0a0a0a80;
+  font-size: 13px;
+}
+
+.form__input {
+  font-size: 16px;
+  padding: 14.5px 16px;
+  border: 1px solid #f3f1e9;
+  border-radius: 8px;
+  margin: 8px 0 0;
+}
+
+.form__input::placeholder {
+  color: #0a0a0a80;
+}
+
+.form__input:focus {
+  outline: 1px solid #3b82f6;
+  caret-color: #3b82f6;
+}
+
+.form__error {
+  color: #ef4444;
+  font-size: 12px;
+  line-height: 1.4;
+  margin: 12px 0 0;
+}
+
+.form__input-container .form__error {
+  margin: 8px 0 0;
+}
+
+.form__submit-btn {
+  margin: 8px 0 0;
+  max-width: fit-content;
+  border-radius: 8px;
+  border: none;
+  padding: 12px 24px;
+  background-color: #0a0a0a;
+  color: #fff;
+}
+
+.form__submit-btn:disabled {
+  background-color: rgb(0 0 0 / 0.1);
+  color: #0a0a0a80;
+}
