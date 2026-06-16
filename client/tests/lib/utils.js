@@ -164,15 +164,19 @@ export function checkBuilds(client) {
 /**
  * Runs a vitest test file silently and returns whether all tests passed.
  * `testFile` is relative to the client directory (e.g.
- * "tests/lesson-04.behavior.test.tsx"). Output is suppressed — students see
- * only the ✅/❌ line from the main runner. On failure, direct them to run
- * `npm test` in client/ for the full vitest output.
+ * "tests/lib/lesson-04.behavior.test.tsx"). Output is suppressed — students
+ * see only the ✅/❌ line from the main runner. On failure, `message` contains
+ * the exact command to run for the full vitest output.
  */
 export function checkBehavior(client, testFile) {
   try {
     execSync(`npx vitest run ${testFile}`, { cwd: client, stdio: "pipe" });
     return { ok: true };
   } catch {
-    return { ok: false };
+    return {
+      ok: false,
+      message: `\n- Run \`npx vitest run ${testFile}\` in client/ for the full vitest output. To output the test results to a file,\n- Run \`NO_COLOR=1 npx vitest run ${testFile} > results.txt\`
+`,
+    };
   }
 }
