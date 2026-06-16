@@ -90,7 +90,7 @@ test("FavoritesPage uses likes", () => {
 
 test("Behavior tests pass", () => {
   const result = checkBehavior(CLIENT, "tests/lib/lesson-08.behavior.test.tsx");
-  assert(result.ok, "Run `npm test` in client/ for the full vitest output");
+  assert(result.ok, result.message);
 });
 
 summary("WE4ySjZX");
