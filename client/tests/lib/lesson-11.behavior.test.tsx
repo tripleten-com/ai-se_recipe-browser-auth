@@ -1,3 +1,6 @@
+import { readFileSync } from "fs";
+import { resolve, dirname } from "path";
+import { fileURLToPath } from "url";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, beforeEach, vi } from "vitest";
@@ -56,7 +59,10 @@ describe("Lesson 11 — httpOnly cookies", () => {
     await user.type(screen.getByLabelText(/email/i), "test@example.com");
     await user.type(screen.getByLabelText(/password/i), "password123");
     await user.click(screen.getByRole("button", { name: /submit/i }));
-    expect(setItemSpy).not.toHaveBeenCalledWith("auth-token", expect.anything());
+    expect(setItemSpy).not.toHaveBeenCalledWith(
+      "auth-token",
+      expect.anything(),
+    );
   });
 
   it("logout calls POST /auth/logout", async () => {
@@ -68,11 +74,24 @@ describe("Lesson 11 — httpOnly cookies", () => {
     });
     renderApp("/");
     await screen.findByText("Spaghetti Carbonara");
-    await user.click(screen.getByRole("button", { name: /logout/i }));
+    await user.click(screen.getByRole("button", { name: /log\s?out/i }));
     const logoutCall = fetchMock.mock.calls.find(([url]: [string]) =>
       url.includes("/auth/logout"),
     );
     expect(logoutCall).toBeDefined();
     expect(logoutCall[1]).toMatchObject({ method: "POST" });
+  });
+
+  it("cookieParser middleware is registered before routes", () => {
+    const serverIndex = resolve(
+      dirname(fileURLToPath(import.meta.url)),
+      "../../../server/src/index.js",
+    );
+    const content = readFileSync(serverIndex, "utf8");
+    const cookieParserIdx = content.indexOf("cookieParser");
+    const firstRouteIdx = content.indexOf('app.use("/');
+    expect(cookieParserIdx).toBeGreaterThan(-1);
+    expect(firstRouteIdx).toBeGreaterThan(-1);
+    expect(cookieParserIdx).toBeLessThan(firstRouteIdx);
   });
 });
