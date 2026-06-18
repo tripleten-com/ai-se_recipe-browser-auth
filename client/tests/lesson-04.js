@@ -7,6 +7,8 @@ import {
   normalize,
   runGates,
   checkBehavior,
+  incrementPass,
+  incrementFail,
   summary,
 } from "./lib/utils.js";
 
@@ -111,9 +113,39 @@ test("RegisterPage navigates to /login on success", () => {
   );
 });
 
-test("Behavior tests pass", () => {
+{
+  const behaviorHints = {
+    "submitting the login form POSTs to /auth/login with the credentials":
+      "Call loginUser(email, password) when the form is submitted",
+    "a successful login stores the token and navigates home":
+      "Store the token in localStorage and navigate to / on successful login",
+    "a successful registration POSTs to /auth/register and navigates to /login":
+      "Call registerUser and navigate to /login on successful registration",
+  };
+
   const result = checkBehavior(CLIENT, "tests/lib/lesson-04.behavior.test.tsx");
-  assert(result.ok, result.message);
-});
+  if (result.tests.length > 0) {
+    const headingIcon = result.ok ? "✅" : "❌";
+    console.log(`${headingIcon} Behavior Tests`);
+    result.tests.forEach((t) => {
+      const icon = t.passed ? "✅" : "❌";
+      const hint = t.passed ? "" : ` — ${behaviorHints[t.name] || ""}`;
+      console.log(`  ${icon} ${t.name}${hint}`);
+      if (t.passed) incrementPass();
+      else incrementFail();
+    });
+    if (!result.ok) {
+      const indentedMessage = result.message
+        .split("\n")
+        .map((line) => (line ? "  " + line : line))
+        .join("\n");
+      console.log(indentedMessage);
+    }
+  } else if (!result.ok) {
+    console.log("❌ Behavior tests —");
+    console.log(result.message);
+    incrementFail();
+  }
+}
 
 summary("V1Y2WDhR");

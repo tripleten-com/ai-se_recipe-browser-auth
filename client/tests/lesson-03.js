@@ -7,6 +7,8 @@ import {
   normalize,
   runGates,
   checkBehavior,
+  incrementPass,
+  incrementFail,
   summary,
 } from "./lib/utils.js";
 
@@ -56,7 +58,9 @@ test("LoginPage has an email input", () => {
 
 test("LoginPage has a password input", () => {
   assert(
-    has(nq(login), "type='password'") && has(login, "minLength={8}") && has(login, "required"),
+    has(nq(login), "type='password'") &&
+      has(login, "minLength={8}") &&
+      has(login, "required"),
     'Add an <input type="password" required minLength={8} ... /> for the password field',
   );
 });
@@ -125,7 +129,9 @@ test("RegisterPage has an email input", () => {
 
 test("RegisterPage has a password input", () => {
   assert(
-    has(nq(register), "type='password'") && has(register, "minLength={8}") && has(register, "required"),
+    has(nq(register), "type='password'") &&
+      has(register, "minLength={8}") &&
+      has(register, "required"),
     'Add an <input type="password" required minLength={8} ... /> for the password field',
   );
 });
@@ -174,9 +180,41 @@ test("App.tsx has a /register route", () => {
   );
 });
 
-test("Behavior tests pass", () => {
+{
+  const behaviorHints = {
+    "login submit button is disabled before any input":
+      "The button should be disabled when the form is empty or invalid",
+    "login submit button stays disabled with an invalid email":
+      "Validate that the email field contains a valid email format",
+    "login submit button is enabled once email and password are valid":
+      "Enable the button only when both fields have valid input",
+    "register submit button is enabled only when all fields are valid":
+      "All three fields (name, email, password) must be filled and valid",
+  };
+
   const result = checkBehavior(CLIENT, "tests/lib/lesson-03.behavior.test.tsx");
-  assert(result.ok, result.message);
-});
+  if (result.tests.length > 0) {
+    const headingIcon = result.ok ? "✅" : "❌";
+    console.log(`${headingIcon} Behavior Tests`);
+    result.tests.forEach((t) => {
+      const icon = t.passed ? "✅" : "❌";
+      const hint = t.passed ? "" : ` — ${behaviorHints[t.name] || ""}`;
+      console.log(`  ${icon} ${t.name}${hint}`);
+      if (t.passed) incrementPass();
+      else incrementFail();
+    });
+    if (!result.ok) {
+      const indentedMessage = result.message
+        .split("\n")
+        .map((line) => (line ? "  " + line : line))
+        .join("\n");
+      console.log(indentedMessage);
+    }
+  } else if (!result.ok) {
+    console.log("❌ Behavior tests —");
+    console.log(result.message);
+    incrementFail();
+  }
+}
 
 summary("U0o5VDRO");

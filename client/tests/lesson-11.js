@@ -7,6 +7,8 @@ import {
   normalize,
   runGates,
   checkBehavior,
+  incrementPass,
+  incrementFail,
   summary,
 } from "./lib/utils.js";
 
@@ -81,9 +83,43 @@ test("Header calls logoutUser on logout", () => {
   );
 });
 
-test("Behavior tests pass", () => {
+{
+  const behaviorHints = {
+    "restores session via GET /users/me without a localStorage token":
+      "The API should use httpOnly cookies for auth instead of localStorage",
+    "every fetch call includes credentials: include":
+      "Add credentials: 'include' to all fetch requests to send cookies",
+    "login does not write auth-token to localStorage":
+      "Remove localStorage.setItem calls since auth is now handled by cookies",
+    "logout calls POST /auth/logout":
+      "Add a logout API endpoint that clears the httpOnly cookie",
+    "cookieParser middleware is registered before routes":
+      "Call app.use(cookieParser()) before app.use('/auth', ...) and other routes in server/src/index.js",
+  };
+
   const result = checkBehavior(CLIENT, "tests/lib/lesson-11.behavior.test.tsx");
-  assert(result.ok, result.message);
-});
+  if (result.tests.length > 0) {
+    const headingIcon = result.ok ? "✅" : "❌";
+    console.log(`${headingIcon} Behavior Tests`);
+    result.tests.forEach((t) => {
+      const icon = t.passed ? "✅" : "❌";
+      const hint = t.passed ? "" : ` — ${behaviorHints[t.name] || ""}`;
+      console.log(`  ${icon} ${t.name}${hint}`);
+      if (t.passed) incrementPass();
+      else incrementFail();
+    });
+    if (!result.ok) {
+      const indentedMessage = result.message
+        .split("\n")
+        .map((line) => (line ? "  " + line : line))
+        .join("\n");
+      console.log(indentedMessage);
+    }
+  } else if (!result.ok) {
+    console.log("❌ Behavior tests pass —");
+    console.log(result.message);
+    incrementFail();
+  }
+}
 
 summary("VkY5QzJL");

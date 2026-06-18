@@ -7,6 +7,8 @@ import {
   normalize,
   runGates,
   checkBehavior,
+  incrementPass,
+  incrementFail,
   summary,
 } from "./lib/utils.js";
 
@@ -72,7 +74,9 @@ test("App.tsx useEffect depends on isAuthenticated", () => {
 test("homeContent shows a sign-in message when not authenticated", () => {
   const n = normalize(app);
   assert(
-    /homeContent\(\).*if \(!isAuthenticated\) \{(?:[^}]|\{[^}]*\})*Sign in/.test(n),
+    /homeContent\(\).*if \(!isAuthenticated\) \{(?:[^}]|\{[^}]*\})*Sign in/.test(
+      n,
+    ),
     'In homeContent(), add an if (!isAuthenticated) branch that renders a "Sign in" link or message',
   );
 });
@@ -85,9 +89,37 @@ test("homeContent shows an error message when fetch fails", () => {
   );
 });
 
-test("Behavior tests pass", () => {
+{
+  const behaviorHints = {
+    "attaches a Bearer token to requests when one is stored":
+      "Add Authorization header with Bearer token to all requests when a token exists",
+    "sends an empty Bearer token when no token is stored":
+      "Always include the Authorization header, even if the token is empty",
+  };
+
   const result = checkBehavior(CLIENT, "tests/lib/lesson-05.behavior.test.tsx");
-  assert(result.ok, result.message);
-});
+  if (result.tests.length > 0) {
+    const headingIcon = result.ok ? "✅" : "❌";
+    console.log(`${headingIcon} Behavior Tests`);
+    result.tests.forEach((t) => {
+      const icon = t.passed ? "✅" : "❌";
+      const hint = t.passed ? "" : ` — ${behaviorHints[t.name] || ""}`;
+      console.log(`  ${icon} ${t.name}${hint}`);
+      if (t.passed) incrementPass();
+      else incrementFail();
+    });
+    if (!result.ok) {
+      const indentedMessage = result.message
+        .split("\n")
+        .map((line) => (line ? "  " + line : line))
+        .join("\n");
+      console.log(indentedMessage);
+    }
+  } else if (!result.ok) {
+    console.log("❌ Behavior tests pass —");
+    console.log(result.message);
+    incrementFail();
+  }
+}
 
 summary("QlozTDVG");
