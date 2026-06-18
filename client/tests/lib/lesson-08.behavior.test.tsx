@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 import { MemoryRouter } from "react-router-dom";
 import { AuthProvider } from "../../src/contexts/AuthContext";
 import App from "../../src/components/App/App";
+import Counter from "../../src/components/Counter/Counter";
 import { mockUser, mockRecipes, stubFetch } from "./helpers";
 
 function renderApp(path: string) {
@@ -54,5 +55,31 @@ describe("Lesson 08 — liking recipes", () => {
 
     expect(await screen.findByText("Chicken Curry")).toBeInTheDocument();
     expect(screen.queryByText("Spaghetti Carbonara")).not.toBeInTheDocument();
+  });
+
+  it("counter displays the number of recipes liked by the current user", async () => {
+    renderApp("/");
+
+    // mockUser.likes = ["r2"], so the counter should show (1)
+    expect(await screen.findByText("(1)")).toBeInTheDocument();
+  });
+});
+
+describe("Lesson 08 — counter when logged out", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    stubFetch({});
+  });
+
+  it("counter shows (0) when user is not logged in", async () => {
+    render(
+      <AuthProvider>
+        <MemoryRouter>
+          <Counter />
+        </MemoryRouter>
+      </AuthProvider>,
+    );
+
+    expect(await screen.findByText("(0)")).toBeInTheDocument();
   });
 });

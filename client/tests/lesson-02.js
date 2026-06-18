@@ -7,6 +7,8 @@ import {
   normalize,
   runGates,
   checkBehavior,
+  incrementPass,
+  incrementFail,
   summary,
 } from "./lib/utils.js";
 
@@ -98,9 +100,39 @@ test("main.tsx wraps App with AuthProvider", () => {
   );
 });
 
-test("Behavior tests pass", () => {
+{
+  const behaviorHints = {
+    "starts signed out":
+      "AuthContext should initialize with isAuthenticated: false",
+    "login sets the current user and stores the token":
+      "The login function should call setCurrentUser and localStorage.setItem",
+    "logout clears the user and removes the token":
+      "The logout function should clear currentUser and localStorage.removeItem",
+  };
+
   const result = checkBehavior(CLIENT, "tests/lib/lesson-02.behavior.test.tsx");
-  assert(result.ok, result.message);
-});
+  if (result.tests.length > 0) {
+    const headingIcon = result.ok ? "✅" : "❌";
+    console.log(`${headingIcon} Behavior Tests`);
+    result.tests.forEach((t) => {
+      const icon = t.passed ? "✅" : "❌";
+      const hint = t.passed ? "" : ` — ${behaviorHints[t.name] || ""}`;
+      console.log(`  ${icon} ${t.name}${hint}`);
+      if (t.passed) incrementPass();
+      else incrementFail();
+    });
+    if (!result.ok) {
+      const indentedMessage = result.message
+        .split("\n")
+        .map((line) => (line ? "  " + line : line))
+        .join("\n");
+      console.log(indentedMessage);
+    }
+  } else if (!result.ok) {
+    console.log("❌ Behavior tests —");
+    console.log(result.message);
+    incrementFail();
+  }
+}
 
 summary("Uks3TTJQ");

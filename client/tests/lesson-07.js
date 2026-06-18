@@ -7,6 +7,8 @@ import {
   normalize,
   runGates,
   checkBehavior,
+  incrementPass,
+  incrementFail,
   summary,
 } from "./lib/utils.js";
 
@@ -47,10 +49,28 @@ test("getCurrentUser calls GET /users/me", () => {
   );
 });
 
-test("AuthContext has isLoading state", () => {
+test("AuthContextValue includes isLoading: boolean", () => {
   assert(
-    has(authCtx, "isLoading"),
-    "Add isLoading: boolean to AuthContextValue and useState(true) in AuthProvider",
+    /type\s+AuthContextValue\s*=\s*\{[\s\S]*?isLoading\s*:\s*boolean/.test(
+      authCtx,
+    ),
+    "Add isLoading: boolean to AuthContextValue type",
+  );
+});
+
+test("createContext default includes isLoading: false", () => {
+  assert(
+    /createContext\s*<[^>]*>\s*\(\s*\{[\s\S]*?isLoading\s*:\s*false/.test(
+      authCtx,
+    ),
+    "Pass isLoading: false to createContext default value",
+  );
+});
+
+test("Provider value includes isLoading", () => {
+  assert(
+    /value\s*=\s*\{\s*[\s\S]*?isLoading[\s\S]*?\}/.test(authCtx),
+    "Include isLoading in the Provider value prop",
   );
 });
 
@@ -89,9 +109,44 @@ test("Header renders the signed-in user name", () => {
   );
 });
 
-test("Behavior tests pass", () => {
+// Display behavior tests as individual list items
+{
+  const behaviorHints = {
+    "restores the session when a valid token is stored":
+      "Check localStorage for a token on mount and call getCurrentUser() to restore the session",
+    "clears an invalid token and stays signed out":
+      "When getCurrentUser() fails in the catch block, remove the invalid token from localStorage",
+    "does not call the API when no token is stored":
+      "Only call getCurrentUser() if a token exists in localStorage",
+    "the header displays Login/Register links only when unauthenticated":
+      "Show Login/Register links only when isAuthenticated is false",
+    "the header displays a logout button and username only when authenticated":
+      "Add a p.header__text element for the username and a button.header__logout-btn for logout, show only when isAuthenticated is true",
+  };
+
   const result = checkBehavior(CLIENT, "tests/lib/lesson-07.behavior.test.tsx");
-  assert(result.ok, result.message);
-});
+  if (result.tests.length > 0) {
+    const headingIcon = result.ok ? "✅" : "❌";
+    console.log(`${headingIcon} Behavior Tests`);
+    result.tests.forEach((t) => {
+      const icon = t.passed ? "✅" : "❌";
+      const hint = t.passed ? "" : ` — ${behaviorHints[t.name] || ""}`;
+      console.log(`  ${icon} ${t.name}${hint}`);
+      if (t.passed) incrementPass();
+      else incrementFail();
+    });
+    if (!result.ok) {
+      const indentedMessage = result.message
+        .split("\n")
+        .map((line) => (line ? "  " + line : line))
+        .join("\n");
+      console.log(indentedMessage);
+    }
+  } else if (!result.ok) {
+    console.log("❌ Behavior tests —");
+    console.log(result.message);
+    incrementFail();
+  }
+}
 
 summary("RFA0SzdS");

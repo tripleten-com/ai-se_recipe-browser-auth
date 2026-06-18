@@ -30,14 +30,9 @@ function printNotRun(label) {
 }
 
 /**
- * Runs a single test. If a gate has failed (see runGates), the test is not
- * executed; it is listed in grey with a grey circle to show it was skipped.
+ * Runs a single test. Tests run regardless of gate status.
  */
 export function test(label, fn) {
-  if (blocked) {
-    printNotRun(label);
-    return;
-  }
   try {
     fn();
     console.log(`✅ ${label}`);
@@ -53,41 +48,50 @@ export function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+/** Increments the pass counter (for custom test display). */
+export function incrementPass() {
+  pass++;
+}
+
+/** Increments the fail counter (for custom test display). */
+export function incrementFail() {
+  fail++;
+}
+
 /**
- * Runs the compile and build gates against the client app. If either fails,
- * its error output is printed, the failure is counted, and all subsequent
- * tests are blocked (displayed grey as "not run" rather than executed).
+ * Runs the compile and build gates against the client app. Shows results but
+ * does not block subsequent tests, so students can see behavioral feedback
+ * even when there are type or build issues.
  */
 export function runGates(client) {
+  const built = checkBuilds(client);
+  if (built.ok) {
+    console.log("✅ App builds and runs without errors");
+    pass++;
+  } else {
+    console.log("❌ App builds and runs without errors — Vite build failed\n");
+    const indented = built.output
+      .split("\n")
+      .map((line) => (line ? "  " + line : line))
+      .join("\n");
+    console.log(indented);
+    fail++;
+  }
+
   const compiled = checkCompiles(client);
   if (compiled.ok) {
-    console.log("✅ Project compiles without type errors");
+    console.log("✅ Project compiles without type errors\n");
     pass++;
   } else {
     console.log(
-      "❌ TypeScript compilation failed — fix all type errors before running tests\n",
+      "❌ Project compiles without type errors — fix TypeScript errors\n",
     );
-    console.log(compiled.output);
+    const indented = compiled.output
+      .split("\n")
+      .map((line) => (line ? "  " + line : line))
+      .join("\n");
+    console.log(indented);
     fail++;
-    blocked = true;
-  }
-
-  if (blocked) {
-    printNotRun("App builds and runs without errors");
-    console.log("");
-    return;
-  }
-
-  const built = checkBuilds(client);
-  if (built.ok) {
-    console.log("✅ App builds and runs without errors\n");
-    pass++;
-  } else {
-    console.log("❌ Vite build failed — the app does not run without errors\n");
-    console.log(built.output);
-    fail++;
-    blocked = true;
-    console.log("");
   }
 }
 
@@ -162,21 +166,41 @@ export function checkBuilds(client) {
 }
 
 /**
- * Runs a vitest test file silently and returns whether all tests passed.
+ * Runs a vitest test file and returns individual test results with friendly names.
  * `testFile` is relative to the client directory (e.g.
- * "tests/lib/lesson-04.behavior.test.tsx"). Output is suppressed — students
- * see only the ✅/❌ line from the main runner. On failure, `message` contains
+ * "tests/lib/lesson-04.behavior.test.tsx"). On failure, includes a message with
  * the exact command to run for the full vitest output.
  */
 export function checkBehavior(client, testFile) {
+  let output = "";
+  let ok = false;
   try {
-    execSync(`npx vitest run ${testFile}`, { cwd: client, stdio: "pipe" });
-    return { ok: true };
-  } catch {
-    return {
-      ok: false,
-      message: `\n- Run \`npx vitest run ${testFile}\` in client/ for the full vitest output. To output the test results to a file,\n- Run \`NO_COLOR=1 npx vitest run ${testFile} > results.txt\`
-`,
-    };
+    output = execSync(`npx vitest run --reporter=verbose ${testFile}`, {
+      cwd: client,
+      stdio: "pipe",
+      encoding: "utf8",
+    });
+    ok = true;
+  } catch (err) {
+    output = err.stdout?.toString() || "";
+    ok = false;
   }
+
+  // Extract individual test results: "✓ path > suite > test name" or "× path > suite > test name"
+  const testMatches = output.match(/^\s*[✓×✗]\s+.+$/gm) || [];
+  const tests = testMatches.map((match) => {
+    const status = match.trim().startsWith("✓");
+    // Extract just the final test name after the last ">"
+    const name = match.split(">").pop().trim();
+    return { name, passed: status };
+  });
+
+  return {
+    ok,
+    tests,
+    message: !ok
+      ? `\n- Run \`npx vitest run ${testFile}\` in client/ for the full vitest output. To output the test results to a file,\n- Run \`NO_COLOR=1 npx vitest run ${testFile} > results.txt\`
+`
+      : undefined,
+  };
 }

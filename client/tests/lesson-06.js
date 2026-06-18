@@ -7,6 +7,8 @@ import {
   normalize,
   runGates,
   checkBehavior,
+  incrementPass,
+  incrementFail,
   summary,
 } from "./lib/utils.js";
 
@@ -87,9 +89,39 @@ test("App.tsx uses PublicRoute", () => {
   );
 });
 
-test("Behavior tests pass", () => {
+{
+  const behaviorHints = {
+    "redirects unauthenticated visitors from a protected route to /login":
+      "Use ProtectedRoute to check isAuthenticated and redirect to /login if false",
+    "shows public routes to unauthenticated visitors":
+      "PublicRoute should allow access to public pages when not authenticated",
+    "redirects authenticated users away from public routes and shows protected content":
+      "Authenticated users should be redirected from public routes to protected content",
+  };
+
   const result = checkBehavior(CLIENT, "tests/lib/lesson-06.behavior.test.tsx");
-  assert(result.ok, result.message);
-});
+  if (result.tests.length > 0) {
+    const headingIcon = result.ok ? "✅" : "❌";
+    console.log(`${headingIcon} Behavior Tests`);
+    result.tests.forEach((t) => {
+      const icon = t.passed ? "✅" : "❌";
+      const hint = t.passed ? "" : ` — ${behaviorHints[t.name] || ""}`;
+      console.log(`  ${icon} ${t.name}${hint}`);
+      if (t.passed) incrementPass();
+      else incrementFail();
+    });
+    if (!result.ok) {
+      const indentedMessage = result.message
+        .split("\n")
+        .map((line) => (line ? "  " + line : line))
+        .join("\n");
+      console.log(indentedMessage);
+    }
+  } else if (!result.ok) {
+    console.log("❌ Behavior tests pass —");
+    console.log(result.message);
+    incrementFail();
+  }
+}
 
 summary("SEMxWTlH");

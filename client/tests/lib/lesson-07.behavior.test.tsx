@@ -1,6 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, it, expect, beforeEach } from "vitest";
+import { BrowserRouter } from "react-router-dom";
 import { AuthProvider, useAuth } from "../../src/contexts/AuthContext";
+import Header from "../../src/components/Header/Header";
 import { mockUser, stubFetch } from "./helpers";
 
 /** Reports the auth state, including the loading phase. */
@@ -57,5 +59,40 @@ describe("Lesson 07 — restoring the session on startup", () => {
 
     expect(await screen.findByText("signed out")).toBeInTheDocument();
     expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("the header displays Login/Register links only when unauthenticated", async () => {
+    stubFetch();
+
+    render(
+      <BrowserRouter>
+        <AuthProvider>
+          <Header />
+        </AuthProvider>
+      </BrowserRouter>,
+    );
+
+    expect(
+      await screen.findByRole("link", { name: /login/i }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /register/i })).toBeInTheDocument();
+  });
+
+  it("the header displays a logout button and username only when authenticated", async () => {
+    localStorage.setItem("auth-token", "test-token");
+    stubFetch({ "GET /users/me": mockUser });
+
+    render(
+      <BrowserRouter>
+        <AuthProvider>
+          <Header />
+        </AuthProvider>
+      </BrowserRouter>,
+    );
+
+    expect(await screen.findByText("Pat")).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /log\s?out/i }),
+    ).toBeInTheDocument();
   });
 });
